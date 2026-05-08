@@ -60,20 +60,15 @@ export default function BookingForm() {
       .catch(() => setUnits([]));
   }, []);
 
-  // Load rooms when unit changes
+  // Load rooms on mount
   useEffect(() => {
-    setForm((f) => ({ ...f, room_id: "" }));
-    setKapasitas("");
-    setRooms([]);
-    if (!form.unit_id) return;
-
     setLoading(true);
     api
-      .getRooms(form.unit_id)
+      .getRooms()
       .then((res) => setRooms(res.data))
       .catch(() => setRooms([]))
       .finally(() => setLoading(false));
-  }, [form.unit_id]);
+  }, []);
 
   // Auto-fill kapasitas when room changes
   useEffect(() => {
@@ -208,7 +203,7 @@ export default function BookingForm() {
                 name="room_id"
                 value={form.room_id}
                 onChange={handleChange}
-                disabled={!form.unit_id || loading}
+                disabled={loading}
                 className={`form-select pr-8 disabled:bg-gray-50 disabled:cursor-not-allowed ${errors.room_id ? "border-red-400" : ""}`}
               >
                 <option value="">

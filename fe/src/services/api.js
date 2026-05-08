@@ -12,7 +12,7 @@ async function request(url, options = {}) {
 
 export const api = {
   getUnits: () => request('/units'),
-  getRooms: (unitId) => request(`/rooms?unit_id=${unitId}`),
+  getRooms: () => request('/rooms'),
   getRoom: (id) => request(`/rooms/${id}`),
   getBookings: (page = 1, limit = 10) => request(`/bookings?page=${page}&limit=${limit}`),
   createBooking: (data) => request('/bookings', { method: 'POST', body: JSON.stringify(data) }),

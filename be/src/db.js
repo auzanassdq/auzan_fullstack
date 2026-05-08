@@ -15,10 +15,8 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS rooms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    unit_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    capacity INTEGER NOT NULL,
-    FOREIGN KEY (unit_id) REFERENCES units(id)
+    capacity INTEGER NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS bookings (
@@ -41,7 +39,7 @@ db.exec(`
 const unitCount = db.prepare('SELECT COUNT(*) as count FROM units').get();
 if (unitCount.count === 0) {
   const insertUnit = db.prepare('INSERT INTO units (name) VALUES (?)');
-  const insertRoom = db.prepare('INSERT INTO rooms (unit_id, name, capacity) VALUES (?, ?, ?)');
+  const insertRoom = db.prepare('INSERT INTO rooms (name, capacity) VALUES (?, ?)');
 
   const units = [
     { name: 'UNIT KEUANGAN' },
@@ -50,15 +48,14 @@ if (unitCount.count === 0) {
     { name: 'UNIT OPERASIONAL' },
   ];
 
+  // Global rooms — available for all units
   const rooms = [
-    { unitIndex: 0, name: 'Ruang Prambanan', capacity: 10 },
-    { unitIndex: 0, name: 'Ruang Borobudur', capacity: 20 },
-    { unitIndex: 1, name: 'Ruang Prambanan', capacity: 10 },
-    { unitIndex: 1, name: 'Ruang Dieng', capacity: 15 },
-    { unitIndex: 2, name: 'Ruang Bromo', capacity: 8 },
-    { unitIndex: 2, name: 'Ruang Borobudur', capacity: 20 },
-    { unitIndex: 3, name: 'Ruang Dieng', capacity: 15 },
-    { unitIndex: 3, name: 'Ruang Prambanan', capacity: 10 },
+    { name: 'Ruang A', capacity: 6 },
+    { name: 'Ruang B', capacity: 10 },
+    { name: 'Ruang C', capacity: 15 },
+    { name: 'Ruang D', capacity: 20 },
+    { name: 'Ruang E', capacity: 30 },
+    { name: 'Ruang F', capacity: 50 },
   ];
 
   const unitIds = [];
@@ -67,8 +64,10 @@ if (unitCount.count === 0) {
     unitIds.push(result.lastInsertRowid);
   }
 
+  const roomIds = [];
   for (const room of rooms) {
-    insertRoom.run(unitIds[room.unitIndex], room.name, room.capacity);
+    const result = insertRoom.run(room.name, room.capacity);
+    roomIds.push(result.lastInsertRowid);
   }
 
   // Seed some sample bookings
@@ -77,10 +76,10 @@ if (unitCount.count === 0) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  insertBooking.run(unitIds[0], 1, '2024-12-11', '11:00', '13:00', 8, 'Snack Siang,Makan Siang', 500000);
-  insertBooking.run(unitIds[1], 3, '2024-12-11', '11:00', '13:00', 3, 'Snack Sore', 150000);
-  insertBooking.run(unitIds[2], 5, '2024-12-12', '09:00', '11:00', 5, 'Snack Siang', 200000);
-  insertBooking.run(unitIds[3], 7, '2024-12-13', '13:00', '15:00', 10, 'Makan Siang,Snack Sore', 750000);
+  insertBooking.run(unitIds[0], roomIds[0], '2024-12-11', '11:00', '13:00', 5, 'Snack Siang,Makan Siang', 500000);
+  insertBooking.run(unitIds[1], roomIds[2], '2024-12-11', '11:00', '13:00', 12, 'Snack Sore', 150000);
+  insertBooking.run(unitIds[2], roomIds[4], '2024-12-12', '09:00', '11:00', 25, 'Snack Siang', 200000);
+  insertBooking.run(unitIds[3], roomIds[1], '2024-12-13', '13:00', '15:00', 8, 'Makan Siang,Snack Sore', 750000);
 
   console.log('✅ Database seeded successfully');
 }

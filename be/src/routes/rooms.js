@@ -2,16 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all rooms (optional filter by unit_id)
+// GET all rooms — global, no unit filter needed
 router.get('/', (req, res) => {
   try {
-    const { unit_id } = req.query;
-    let rooms;
-    if (unit_id) {
-      rooms = db.prepare('SELECT * FROM rooms WHERE unit_id = ? ORDER BY name').all(unit_id);
-    } else {
-      rooms = db.prepare('SELECT r.*, u.name as unit_name FROM rooms r JOIN units u ON r.unit_id = u.id ORDER BY r.name').all();
-    }
+    const rooms = db.prepare('SELECT * FROM rooms ORDER BY name').all();
     res.json({ success: true, data: rooms });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
